@@ -1,0 +1,17 @@
+[package]
+name = "patricia_router"
+version = "0.1.0"
+authors = ["TobiasGSmollett <landofscala@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Radix Tree implementation for Rust"
+readme = "README.md"
+repository = "https://github.com/TobiasGSmollett/patricia_router"
+keywords = ["web", "http", "routing", "router", "radix"]
+categories = ["data-structures"]
+
+[badges]
+travis-ci = { repository = "TobiasGSmollett/patricia_router" }
+codecov = { repository = "TobiasGSmollett/patricia_router" }
+
+[dependencies]
