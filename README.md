@@ -1,4 +1,6 @@
 # patricia_router
+[![crate-name at crates.io](https://img.shields.io/crates/v/patricia_router.svg)](https://crates.io/crates/patricia_router)
+[![crate-name at docs.rs](https://docs.rs/patricia_router/badge.svg)](https://docs.rs/patricia_router)
 [![Build Status](https://travis-ci.org/TobiasGSmollett/patricia_router.svg?branch=master)](https://travis-ci.org/TobiasGSmollett/patricia_router) [![codecov](https://codecov.io/gh/TobiasGSmollett/patricia_router/branch/master/graph/badge.svg)](https://codecov.io/gh/TobiasGSmollett/patricia_router)  
 
 

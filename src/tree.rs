@@ -37,6 +37,7 @@ impl<T> Tree<T> {
         let mut rest_key_peekable = node.key.chars().peekable();
         let mut pos = 0;
 
+        // move cursor position to last shared character between key and path
         loop {
             let p = rest_path_peekable.peek();
             let k = rest_key_peekable.peek();
@@ -52,7 +53,11 @@ impl<T> Tree<T> {
         let key_size = node.key.bytes().len();
         let path_size = path.bytes().len();
 
+        // determine split point difference between path and key
+        // compare if path is larger than key
         if pos == 0 || (key_size <= pos && pos < path_size) {
+            // determine if a child of this node contains the remaining part
+            // of the path
             let new_key = rest_path.as_str();
             let child_op = node
                 .children
@@ -67,11 +72,16 @@ impl<T> Tree<T> {
             }
             node.sort_children();
         } else if key_size == pos && pos == path_size {
+            // determine if path matches key and potentially be a duplicate
+            // and raise if is the case
+
             if node.payload.is_some() {
                 panic!("duplicate error");
             }
             node.payload = payload;
         } else if 0 < pos && pos < key_size {
+            // determine if current node key needs to be split to accomodate new
+            // children nodes
             let rest_key = rest_key_peekable.collect::<String>();
             let new_key = rest_key.as_str();
             let mut new_node: Node<T> = Node::<T>::new(new_key, None, false);
@@ -79,6 +89,7 @@ impl<T> Tree<T> {
             new_node.children = std::mem::replace(&mut node.children, vec![]);
             node.set_key(prefix(path, pos));
             node.children.push(new_node);
+            // determine if path still continues
             if pos < path_size {
                 node.children
                     .push(Node::<T>::new(rest_path.as_str(), payload, false));
@@ -130,13 +141,21 @@ impl<T> Tree<T> {
             }
             if let Some(k) = key_current {
                 if k == '*' {
+                    // deal with catch all (globbing) parameter
+                    // extract parameter name from key (exclude *) and value from path
                     let name = suffix(&node.key, key_pos + 1);
                     let value = suffix(path, path_pos);
                     result.params.insert(name, value);
                     return result.add(node, true);
                 } else if k == ':' {
+                    // deal with named parameter
+                    // extract parameter name from key (from : until / or EOL) and
+                    // value from path (same rules as key)
                     let key_size = detect_param_size(&node.key, key_pos);
                     let path_size = detect_param_size(path, path_pos);
+                    // obtain key and value using calculated sizes
+                    // for name: skip ':' by moving one character forward and compensate
+                    // key size.
                     let name = substring(&node.key, key_pos + 1, key_size);
                     let value = substring(path, path_pos, path_size);
                     result.params.insert(name, value);
@@ -151,10 +170,12 @@ impl<T> Tree<T> {
         let path_next = path.chars().nth(path_pos);
         let key_next = node.key.chars().nth(key_pos);
 
+        // check if we reached the end of the path & key
         if path_next.is_none() && key_next.is_none() && node.payload.is_some() {
             return result.add(node, true);
         }
 
+        // still path to walk, check for possible trailing slash or children nodes
         if path_next.is_some() {
             if 0 < key_size && has_trailing_slash(path_pos, path_size, path) {
                 return result.add(node, true);
@@ -172,6 +193,7 @@ impl<T> Tree<T> {
             return result;
         }
 
+        // key still contains characters to walk
         if key_next.is_some() {
             if has_trailing_slash(key_pos, key_size, &node.key) {
                 return result.add(node, true);

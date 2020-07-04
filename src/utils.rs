@@ -16,6 +16,12 @@ pub(crate) fn same_first_char(a: &str, b: &str) -> bool {
     a_first == b_first
 }
 
+/// Compares *path* against *key* for differences until the
+/// following criteria is met:
+///
+/// - End of *path* or *key* is reached.
+/// - A separator (`/`) is found.
+/// - A character between *path* or *key* differs
 fn same_key(path: &str, key: &str) -> bool {
     let mut it = path
         .chars()
@@ -28,10 +34,22 @@ fn same_key(path: &str, key: &str) -> bool {
     }
 }
 
+/// Allow inline comparison of *char* against 3 defined markers:
+///
+/// - Path separator (`/`)
+/// - Named parameter (`:`)
+/// - Catch all (`*`)
 fn check_markers(ch: Option<char>) -> bool {
     ch == Some('/') || ch == Some(':') || ch == Some('*')
 }
 
+/// Compares *path* against *key* for equality until one of the
+/// following criterias is met:
+///
+/// - End of *path* or *key* is reached.
+/// - A separator (`/`) is found.
+/// - A named parameter (`:`) or catch all (`*`) is found.
+/// - A character in *path* differs from *key*
 pub(crate) fn shared_key(path: &str, key: &str) -> bool {
     let key_first = key.chars().next();
     if path.chars().next() != key_first && check_markers(key_first) {
@@ -79,8 +97,11 @@ mod test {
 
     #[test]
     fn test_same_key() {
+        // mismatch at 1st character
         assert!(!same_key("foo", "bar"));
+        // only foo is compared
         assert!(same_key("foo/bar", "foo/baz"));
+        // zip is shorter
         assert!(!same_key("zipcode", "zip"));
         assert!(same_key("zip", "zipcode"));
         assert!(!same_key("s", "/new"));
@@ -90,10 +111,14 @@ mod test {
 
     #[test]
     fn test_shared_key() {
+        // mismatch at 1st character
         assert!(!shared_key("foo", "bar"));
+        // only foo is compared
         assert!(shared_key("foo/bar", "foo/baz"));
+        //  only zip is compared
         assert!(shared_key("zipcode", "zip"));
         assert!(!shared_key("zip", "zipcode"));
+        // 1st character is a separator
         assert!(!shared_key("s", "/new"));
         assert!(!shared_key("foo/bar", "fooa/baz"));
         assert!(shared_key("fooa/bar", "foo/baz"));
