@@ -130,24 +130,27 @@ impl<T> Tree<T> {
 
         let mut path_pos = 0;
         let mut key_pos = 0;
+        let path_vec: Vec<char> = path.chars().collect();
+        let key_vec: Vec<char> = node.key.chars().collect();
         loop {
-            let path_current = path.chars().nth(path_pos);
-            let key_current = node.key.chars().nth(key_pos);
+            let path_current = path_vec.get(path_pos);
+            let key_current = key_vec.get(key_pos);
             if path_current.is_none() || key_current.is_none() {
                 break;
             }
-            if key_current != Some('*') && key_current != Some(':') && path_current != key_current {
+            if key_current != Some(&'*') && key_current != Some(&':') && path_current != key_current
+            {
                 break;
             }
             if let Some(k) = key_current {
-                if k == '*' {
+                if k == &'*' {
                     // deal with catch all (globbing) parameter
                     // extract parameter name from key (exclude *) and value from path
                     let name = suffix(&node.key, key_pos + 1);
                     let value = suffix(path, path_pos);
                     result.params.insert(name, value);
                     return result.add(node, true);
-                } else if k == ':' {
+                } else if k == &':' {
                     // deal with named parameter
                     // extract parameter name from key (from : until / or EOL) and
                     // value from path (same rules as key)
@@ -167,8 +170,8 @@ impl<T> Tree<T> {
             key_pos += 1;
         }
 
-        let path_next = path.chars().nth(path_pos);
-        let key_next = node.key.chars().nth(key_pos);
+        let path_next = path_vec.get(path_pos);
+        let key_next = key_vec.get(key_pos);
 
         // check if we reached the end of the path & key
         if path_next.is_none() && key_next.is_none() && node.payload.is_some() {
@@ -200,7 +203,7 @@ impl<T> Tree<T> {
             }
 
             if node.has_catch_all(key_pos, key_size) {
-                if key_next != Some('*') {
+                if key_next != Some(&'*') {
                     key_pos += 1;
                 }
                 let name = suffix(&node.key, key_pos + 1);
